@@ -59,3 +59,6 @@ get_jofogas <- function(searchterm, page_to_download) {
 }
 
 df <- get_jofogas(searchterm = 'asztal', 3)
+
+saveRDS(df, file = '/Users/utassydv/Documents/workspaces/CEU/my_repos/web_scraping_R/homeworks/project1/output.rds')
+write.csv(df, file = '/Users/utassydv/Documents/workspaces/CEU/my_repos/web_scraping_R/homeworks/project1/output.csv')
