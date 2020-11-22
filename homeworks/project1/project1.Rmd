@@ -1,0 +1,63 @@
+---
+title: "Web scraping - Project 1"
+author: "David Utassy"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rvest)
+library(moments)
+library(data.table)
+```
+
+## Overview
+
+This is the output document of [**Project 1**](https://ceuedu-my.sharepoint.com/:x:/g/personal/orsosm_ceu_edu/ETc-Mf_JpbRPjSdH2t3d6ScB_z0xBrn8RmR4HtLx37_-xg?e=lDFYFj) for Web Srcaping in R. This project is created by David Utassy and its main purpose is to practice the basics of Web Scraping. The code scrapes [**www.jofogas.hu**](https://www.jofogas.hu/) with a given search term and the number of pages to scrape. 
+
+## Function to scrape one page
+
+```{r}
+get_one_page_from_jofogas  <- function(my_url) {
+  print(my_url)
+  t <- read_html(my_url)
+  boxes <- t %>% 
+    html_nodes('.contentArea')
+  x <- boxes[[1]]
+  
+  boxes_df <- lapply(boxes, function(x){
+    t_list <- list()
+    t_list[['title']] <- x %>% html_nodes('.subject') %>% html_text()
+    t_list[['link']] <- x %>% html_nodes('.subject') %>% html_attr('href')
+    t_list[['price']]  <- x %>% html_nodes('.price-value') %>% html_text()
+    t_list[['category']]  <- x %>% html_nodes('.category') %>% html_text()
+    t_list[['location']]  <- x %>% html_nodes('.cityname') %>% html_text()
+    t_list[['upload_time']]  <- x %>% html_nodes('.time') %>% html_text()
+    return(data.frame(t_list))  
+  })
+  
+  df <- rbindlist(boxes_df)
+  return(df)
+}
+```
+
+## A definable funtion to srape according to given searchterm and given number of pages 
+
+```{r}
+get_jofogas <- function(searchterm, page_to_download) {
+  # create links
+ links_to_get <- 
+  paste0('https://www.jofogas.hu/magyarorszag?q=',searchterm, '&o=', seq(1, page_to_download))
+ ret_df <- rbindlist(lapply(links_to_get, get_one_page_from_jofogas))
+  return(ret_df)
+}
+```
+
+``` {r, message=FALSE}
+df <- get_jofogas(searchterm = 'asztal', 3)
+knitr::kable(df)
+```
